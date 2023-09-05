@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/hashicorp/go-hclog"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -49,15 +50,16 @@ func (req *request) authenticate() bool {
 		panic(err)
 	}
 
-	if ca, err := os.ReadFile(caFilePath); err != nil {
+	if ca, err := ioutil.ReadFile(caFilePath); err != nil {
 		panic(err)
 	} else if ok := certPool.AppendCertsFromPEM(ca); !ok {
 		panic("invalid cert in CA PEM")
 	}
 
 	tlsConfig := &tls.Config{
-		RootCAs:      certPool,
-		Certificates: []tls.Certificate{cert},
+		RootCAs:            certPool,
+		Certificates:       []tls.Certificate{cert},
+		InsecureSkipVerify: true,
 	}
 
 	tr := &http.Transport{
@@ -77,13 +79,14 @@ func (req *request) authenticate() bool {
 	}
 	defer resp.Body.Close()
 
-	logger.Debug("Response", "StatusCode", resp.StatusCode, "Status")
-	logger.Debug("Response", "Body", resp.Body)
+	logger.Debug("Response", "StatusCode", resp.StatusCode, "Status", resp.Status)
 
-	var res response
+	var res Response
 	json.NewDecoder(resp.Body).Decode(&res)
 
-	if res.status.Result == "SUCCESS" {
+	logger.Debug("Decoded Response", "Status", res.Status, "Result", res.Status.Result, "ResultCode", res.Status.ResultCode)
+
+	if res.Status.Result == "SUCCESS" {
 		return true
 	} else {
 		return false
@@ -123,10 +126,10 @@ type request struct {
 	password string
 }
 
-type response struct {
-	status struct {
+type Response struct {
+	Status struct {
 		Result     string `json:"result"`
 		ResultCode string `json:"resultCode"`
 		ErrMsg     string `json:"errMsg"`
-	}
+	} `json:"status"`
 }

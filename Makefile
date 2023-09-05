@@ -1,7 +1,7 @@
 AUTH_SCRIPT_SOURCE=https://github.com/matevzmihalic/auth-script-openvpn/tarball/master
 
 INSTDIR=/usr/bin
-BUILD_DIR= build
+BUILD_DIR=build
 
 all: $(BUILD_DIR)/gooroom-openvpn-gpms-auth $(BUILD_DIR)/auth_script.so
 
