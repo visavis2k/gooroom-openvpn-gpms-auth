@@ -15,7 +15,7 @@ import (
 var (
 	logger hclog.Logger
 
-	caFilePath   = "/etc/ssl/gpms/rootca/root_cacert.pem"
+	caFilePath   = "/etc/openvpn/client/root_cacert.pem"
 	certFilePath = "/etc/openvpn/client/gooroom_client.crt"
 	keyFilePath  = "/etc/openvpn/client/gooroom_client.key"
 
