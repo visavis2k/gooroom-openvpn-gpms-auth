@@ -14,7 +14,7 @@ $(BUILD_DIR)/auth_script.so: auth-script-openvpn
 	mv auth-script-openvpn/auth_script.so $(BUILD_DIR)
 
 $(BUILD_DIR)/gooroom-openvpn-gpms-auth: *.go
-	go build -ldflags="-s -w" -o $(BUILD_DIR)/gooroom-openvpn-gpms-auth ./src
+	go build -ldflags="-s -w" -o $(BUILD_DIR)/gooroom-openvpn-gpms-auth .
 
 clean:
 	rm -rf $(BUILD_DIR)
