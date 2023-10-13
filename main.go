@@ -68,7 +68,7 @@ func main() {
 func (req *request) authenticate() bool {
 	cert, err := tls.LoadX509KeyPair(certFilePath, keyFilePath)
 	if err != nil {
-		logger.Error("Error lading cert and key file", "error", err)
+		logger.Error("Error loding cert and key file", "error", err)
 	}
 
 	certPool, err := x509.SystemCertPool()
