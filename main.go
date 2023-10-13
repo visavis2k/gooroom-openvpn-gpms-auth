@@ -6,26 +6,52 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/hashicorp/go-hclog"
+	"io/fs"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+
+	"github.com/hashicorp/go-hclog"
+	"github.com/spf13/viper"
 )
 
 var (
 	logger hclog.Logger
 
-	caFilePath   = "/etc/openvpn/client/root_cacert.pem"
-	certFilePath = "/etc/openvpn/client/gooroom_client.crt"
-	keyFilePath  = "/etc/openvpn/client/gooroom_client.key"
+	caFilePath   string
+	certFilePath string
+	keyFilePath  string
 
-	authEndpoint = "https://glm.javaworld.co.kr/glm/v1/pam/authconfirm"
+	authEndpoint string
 )
 
 func main() {
 	logger = hclog.Default()
 	logger.SetLevel(hclog.Debug)
+
+	viper.SetConfigFile("/etc/gooroom/gooroom-client-server-register/gcsr.conf")
+	viper.SetConfigType("props")
+	viper.SetDefault("caFilePath", "/etc/openvpn/client/root_cacert.pem")
+	viper.SetDefault("certFilePath", "/etc/openvpn/client/gooroom_client.crt")
+	viper.SetDefault("keyFilePath", "/etc/openvpn/client/gooroom_client.key")
+	viper.SetDefault("authEndpoint", "https://glm.javaworld.co.kr/glm/v1/pam/authconfirm")
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(*fs.PathError); ok {
+			// ignore
+		} else if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// ignore
+		} else {
+			logger.Error("Error loading config", "error", err)
+			os.Exit(5)
+		}
+	}
+
+	caFilePath = viper.GetString("caFilePath")
+	certFilePath = viper.GetString("certFilePath")
+	keyFilePath = viper.GetString("keyFilePath")
+	authEndpoint = viper.GetString("authEndpoint")
 
 	data := request{
 		username: os.Getenv("username"),
